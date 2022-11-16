@@ -1,0 +1,8 @@
+{
+  "require": {
+    "cboden/ratchet": "^0.4.4",
+    "ext-json": "*",
+    "ext-mysqli": "*",
+    "firebase/php-jwt": "^6.3"
+  }
+}
