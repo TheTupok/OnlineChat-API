@@ -12,9 +12,9 @@
 
     class WebSocket implements MessageComponentInterface
     {
-        protected $clients;
-        private $dbService;
-        private $JWTService;
+        protected \SplObjectStorage $clients;
+        private DatabaseService $dbService;
+        private JWTService $JWTService;
 
         public function __construct()
         {
@@ -40,26 +40,19 @@
 
         public function onMessage(ConnectionInterface $from, $msg)
         {
-            $query = $from->httpRequest->getUri()->getQuery();
-            $outputQuery = [];
-            parse_str($query, $outputQuery);
-
             $msg = json_decode($msg, true);
             $typeOperation = $msg['typeOperation'];
 
-            if ($this->JWTService->decodeJWT($outputQuery['jwt'])) {
-                $response = ['typeOperation' => 'checkJWT', 'response' => '200'];
-                $this->sendMessage($response, $from);
-
+            if (isset($msg['jwt']) && $this->JWTService->decodeJWT($msg['jwt'])) {
                 if ($typeOperation == 'getUserData') {
-                    $userData = $this->dbService->getUserData($msg['userId']);
+                    $userData = $this->dbService->getUserData($msg['request']);
                     $response = ['typeOperation' => $typeOperation, 'response' => $userData];
 
                     $this->sendMessage($response, $from);
                 }
             } else {
                 if ($typeOperation == 'login') {
-                    $userInfo = $this->dbService->loginUser($msg);
+                    $userInfo = $this->dbService->loginUser($msg['request']);
 
                     if (!isset($userInfo['error'])) {
                         $userInfo = $this->JWTService->encodeJWT($userInfo);
@@ -68,7 +61,7 @@
                     $response = ['typeOperation' => $typeOperation, 'response' => $userInfo];
                     $this->sendMessage($response, $from);
                 } else if ($typeOperation == 'signUp') {
-                    $userInfo = $this->dbService->signUpUser($msg);
+                    $userInfo = $this->dbService->signUpUser($msg['request']);
 
                     if (!isset($userInfo['error'])) {
                         $userInfo = $this->JWTService->encodeJWT($userInfo);
@@ -77,7 +70,7 @@
                     $response = ['typeOperation' => $typeOperation, 'response' => $userInfo];
                     $this->sendMessage($response, $from);
                 } else {
-                    $response = ['typeOperation' => 'checkJWT', 'response' => '400'];
+                    $response = ['typeOperation' => 'errorJWT'];
                     $this->sendMessage($response, $from);
                 }
             }

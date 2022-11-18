@@ -29,7 +29,8 @@
             return $row['MAX(id)'];
         }
 
-        public function getUserData($id) {
+        public function getUserData($id): array|null
+        {
             $mysqli = $this->openDatabaseConn();
             $sql = "SELECT id, username, image, role FROM users WHERE id = $id";
 
@@ -41,7 +42,7 @@
             return $row;
         }
 
-        public function signUpUser($userParam)
+        public function signUpUser($userParam): array
         {
             $mysqli = $this->openDatabaseConn();
             $id = $this->getLastId('users') + 1;
@@ -73,7 +74,7 @@
             }
         }
 
-        public function loginUser($userParam)
+        public function loginUser($userParam): array
         {
             $mysqli = $this->openDatabaseConn();
 
