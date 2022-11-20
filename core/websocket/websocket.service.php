@@ -2,8 +2,8 @@
 
     namespace Socket;
 
-    require "db.service.php";
-    require "JWT.service.php";
+    require "./core/services/db.service.php";
+    require "./core/services/JWT.service.php";
 
     use Ratchet\MessageComponentInterface;
     use Ratchet\ConnectionInterface;
@@ -49,6 +49,14 @@
                     $response = ['typeOperation' => $typeOperation, 'response' => $userData];
 
                     $this->sendMessage($response, $from);
+                } else if ($typeOperation == 'getGroupList') {
+                    $groupList = $this->dbService->getGroupList();
+                    $response = ['typeOperation' => $typeOperation, 'response' => $groupList];
+
+                    $this->sendMessage($response, $from);
+                } else if ($typeOperation == 'setGroupId') {
+                    $from->nowChatId = $msg['request'];
+                    echo $from->nowChatId;
                 }
             } else {
                 if ($typeOperation == 'login') {

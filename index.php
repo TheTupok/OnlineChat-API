@@ -1,6 +1,6 @@
 <?php
     require "./vendor/autoload.php";
-    require "./services/websocket.service.php";
+    require "./core/websocket/websocket.service.php";
 
     use Ratchet\Server\IoServer;
     use Ratchet\Http\HttpServer;

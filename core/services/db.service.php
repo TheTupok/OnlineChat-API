@@ -3,9 +3,12 @@
     namespace Database;
 
     use mysqli;
+    use ImageService;
 
     class DatabaseService
     {
+        protected ImageService $imageService;
+
         private function openDatabaseConn()
         {
             $mysqli = new mysqli("localhost", "root", "root", "onlinechat");
@@ -38,8 +41,25 @@
             $row = $result->fetch_assoc();
 
             $mysqli->close();
-
             return $row;
+        }
+
+        public function getGroupList(): array|null
+        {
+            $mysqli = $this->openDatabaseConn();
+            $sql = "SELECT * FROM listgroups";
+
+            $groups = array();
+
+            $result = $mysqli->query($sql);
+            if ($result->num_rows > 0) {
+                foreach($result as $row) {
+                    $groups[] = $row;
+                }
+            }
+
+            $mysqli->close();
+            return $groups;
         }
 
         public function signUpUser($userParam): array
@@ -51,10 +71,8 @@
             $result = $mysqli->query($sql)->fetch_assoc();
 
             if (empty($result)) {
-                $path = 'temp/standard_avatar.jpg';
-                $type = pathinfo($path, PATHINFO_EXTENSION);
-                $data = file_get_contents($path);
-                $image = 'data:image/' . $type . ';base64' . base64_encode($data);
+                $path = 'temp/standard_user_avatar.jpg';
+                $image = $this->imageService->encodeImage($path);
 
                 $sql = "INSERT INTO users(id, username, login, password, image)
                 VALUES (
